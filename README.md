@@ -29,11 +29,11 @@ A modern cross-platform music streaming app built with React Native CLI! This ap
 ## 📱 App Preview
 
 
-Home
+
 <img width="200" height="750" alt="Screenshot_1760509761" src="https://github.com/user-attachments/assets/55ed1e82-d254-46a7-9471-2ae99b4e4595" />
-Liked
+
 <img width="200" height="750" alt="Screenshot_1760509779" src="https://github.com/user-attachments/assets/c00ef936-6b99-4420-81ed-28f95ed50444" />
-Playback
+
 <img width="200" height="750" alt="Screenshot_1760509794" src="https://github.com/user-attachments/assets/973ff635-2f70-4bd5-8458-e19753d27b27" />
 
 
