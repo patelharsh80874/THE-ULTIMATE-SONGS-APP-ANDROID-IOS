@@ -40,6 +40,11 @@ A modern cross-platform music streaming app built with React Native CLI! This ap
 - 🔄 **Background playback** with device control panel integration (Android notification/lock screen, see screenshot)   
 - 📱 Android ready; **iOS version coming soon**  
 
+## ⬇️ Download
+
+[<img src="https://github.com/gokadzev/Musify/raw/master/repository_files/get-it-on-github.png" alt="Get it on Github" height="80">](https://github.com/patelharsh80874/THE-ULTIMATE-SONGS-APP-ANDROID-IOS/releases/latest)
+
+
 ---
 
 ## 💻 Tech Stack
