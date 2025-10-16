@@ -18,14 +18,6 @@ A modern cross-platform music streaming app built with React Native CLI! This ap
 
 ---
 
-## 📥 Download APK
-
-🔗 **[Download Latest APK](https://github.com/patelharsh80874/THE-ULTIMATE-SONGS-APP-ANDROID-IOS/releases/latest)**
-
-*The APK file is hosted in the repository’s "Releases" section to keep the codebase lightweight.*
-
----
-
 ## 📱 App Preview
 
 
