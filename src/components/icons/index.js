@@ -319,3 +319,26 @@ export const DisLikeIcon = ({size = 24, color = '#000'}) => (
   </Svg>
 );
 
+export const PlaylistIcon = ({size = 24, color = '#000'}) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+    <Path
+      d="M2 18H12V20H2V18ZM2 11H22V13H2V11ZM2 4H22V6H2V4ZM18 18V15H20V18H23V20H20V23H18V20H15V18H18Z"
+      stroke={color}
+      strokeWidth="1"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
+export const CloseCircleFill = ({size = 24, color = '#000'}) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+    <Path
+      d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 10.5858L9.17157 7.75736L7.75736 9.17157L10.5858 12L7.75736 14.8284L9.17157 16.2426L12 13.4142L14.8284 16.2426L16.2426 14.8284L13.4142 12L16.2426 9.17157L14.8284 7.75736L12 10.5858Z"
+      stroke={color}
+      strokeWidth="1"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);

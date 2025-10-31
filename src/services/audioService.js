@@ -1,4 +1,5 @@
 import {AudioPro, AudioProContentType} from 'react-native-audio-pro';
+import { addToRecentlyPlayed } from '../utils/storage';
 
 export function setupAudioService() {
   // Configure Audio Pro
@@ -23,6 +24,7 @@ export async function playTrack(song) {
   };
 
   AudioPro.play(track, {autoPlay: true});
+  await addToRecentlyPlayed(song);
 }
 
 export async function pauseAudio() {

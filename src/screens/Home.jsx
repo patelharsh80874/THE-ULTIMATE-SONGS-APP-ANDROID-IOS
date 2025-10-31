@@ -1,330 +1,3 @@
-// import React, { useState, useEffect } from 'react';
-// import { Dimensions } from 'react-native';
-// import {
-//   View,
-//   Text,
-//   ScrollView,
-//   ActivityIndicator,
-//   RefreshControl,
-//   StatusBar,
-// } from 'react-native';
-// import { SafeAreaView } from 'react-native-safe-area-context';
-// import { MusicIcon } from '../components/icons';
-// import LanguageDropdown from '../components/LanguageDropdown';
-// import HorizontalSongList from '../components/HorizontalSongList';
-// import Section from '../components/Section';
-// import { fetchSongs, fetchModules } from '../services/api';
-
-// export default function Home({
-//   playSong,
-//   currentSong,
-//   likedSongs,
-//   updateLikedSongs,
-//   openPlaylistDetails,
-//   openAlbumDetails,
-// }) {
-//   const [selectedLanguage, setSelectedLanguage] = useState('hindi');
-//   const [songs, setSongs] = useState([]);
-//   const [modules, setModules] = useState({
-//     albums: [],
-//     playlists: [],
-//     charts: [],
-//   });
-//   const [loading, setLoading] = useState(true);
-//   const [refreshing, setRefreshing] = useState(false);
-//   const { width } = Dimensions.get('window');
-
-//   useEffect(() => {
-//     loadData();
-//   }, [selectedLanguage]);
-
-//   const loadData = async () => {
-//     setLoading(true);
-//     const [songsData, modulesData] = await Promise.all([
-//       fetchSongs(selectedLanguage),
-//       fetchModules(selectedLanguage),
-//     ]);
-//     setSongs(songsData);
-//     setModules(modulesData);
-//     setLoading(false);
-//   };
-
-//   const onRefresh = async () => {
-//     setRefreshing(true);
-//     await loadData();
-//     setRefreshing(false);
-//   };
-
-//   if (loading) {
-//     return (
-//       <View className="flex-1 bg-slate-950 justify-center items-center">
-//         <ActivityIndicator size="large" color="#10b981" />
-//       </View>
-//     );
-//   }
-
-//   return (
-//     <View className="flex-1 bg-slate-950">
-//       <StatusBar barStyle="light-content" backgroundColor="#020617" />
-//       <SafeAreaView edges={['top']} className="flex-1">
-//         {/* Premium Header */}
-//         <View className="px-6 pt-6 pb-6">
-//           <View className="flex-row items-center justify-between mb-2">
-//             <View className="flex-row items-center gap-4">
-//               <View className="w-14 h-14 bg-emerald-500 rounded-3xl items-center justify-center shadow-lg shadow-emerald-700/50">
-//                 <MusicIcon size={24} color="#10b981" filled />
-//               </View>
-
-//               <View>
-//                 <Text className="text-gray-400 text-xs font-semibold tracking-wide uppercase">
-//                   Welcome to
-//                 </Text>
-//                 <Text
-//                   className="text-white text-4xl font-extrabold tracking-tight"
-//                   style={{ letterSpacing: 0.8 }}
-//                 >
-//                   The Ultimate
-//                 </Text>
-//               </View>
-//             </View>
-
-//             <View className="items-center">
-//               <Text className="text-emerald-400 font-semibold tracking-wide text-xs">
-//                 Made by
-//               </Text>
-//               <Text className="text-emerald-400 font-bold text-lg tracking-wider">
-//                 Harsh Patel
-//               </Text>
-//             </View>
-//           </View>
-
-//           <View className="flex-row items-center gap-3">
-//             <View
-//               className="h-1 rounded-full"
-//               style={{ width: width / 6, backgroundColor: '#10b981' }}
-//             />
-//             <Text className="text-emerald-400 text-4xl font-bold tracking-wide">
-//               Songs
-//             </Text>
-//           </View>
-
-//           <LanguageDropdown
-//             selected={selectedLanguage}
-//             onSelect={setSelectedLanguage}
-//           />
-//         </View>
-
-//         <ScrollView
-//           showsVerticalScrollIndicator={false}
-//           refreshControl={
-//             <RefreshControl
-//               refreshing={refreshing}
-//               onRefresh={onRefresh}
-//               tintColor="#10b981"
-//             />
-//           }
-//         >
-//           <View className="px-6 pb-32">
-//             <Section title="Trending Songs" icon="fire">
-//               <HorizontalSongList
-//                 songs={songs}
-//                 onPlay={song => playSong(song, songs)}
-//                 currentSong={currentSong}
-//                 likedSongs={likedSongs}
-//                 updateLikedSongs={updateLikedSongs}
-//               />
-//             </Section>
-
-//             <Section title="Top Charts" icon="chart">
-//               <HorizontalSongList
-//                 songs={modules.charts}
-//                 onCardPress={openPlaylistDetails}
-//                 currentSong={currentSong}
-//                 isChart={true}
-//               />
-//             </Section>
-
-//             <Section title="Curated Playlists" icon="playlist">
-//               <HorizontalSongList
-//                 songs={modules.playlists}
-//                 onCardPress={openPlaylistDetails}
-//                 currentSong={currentSong}
-//                 isPlaylist={true}
-//               />
-//             </Section>
-
-//             <Section title="New Albums" icon="disc">
-//               <HorizontalSongList
-//                 songs={modules.albums}
-//                 onCardPress={openAlbumDetails}
-//                 currentSong={currentSong}
-//                 isAlbum={true}
-//               />
-//             </Section>
-//           </View>
-//         </ScrollView>
-//       </SafeAreaView>
-//     </View>
-//   );
-// }
-
-// import React, { useState, useEffect } from 'react';
-// import {
-//   Dimensions,
-//   View,
-//   Text,
-//   ScrollView,
-//   ActivityIndicator,
-//   RefreshControl,
-//   StatusBar,
-//   Image,
-// } from 'react-native';
-// import { SafeAreaView } from 'react-native-safe-area-context';
-// import { MusicIcon } from '../components/icons';
-// import LanguageDropdown from '../components/LanguageDropdown';
-// import HorizontalSongList from '../components/HorizontalSongList';
-// import Section from '../components/Section';
-// import { fetchSongs, fetchModules } from '../services/api';
-
-// export default function Home({
-//   playSong,
-//   currentSong,
-//   likedSongs,
-//   updateLikedSongs,
-//   openPlaylistDetails,
-//   openAlbumDetails,
-// }) {
-//   const [selectedLanguage, setSelectedLanguage] = useState('hindi');
-//   const [songs, setSongs] = useState([]);
-//   const [modules, setModules] = useState({
-//     albums: [],
-//     playlists: [],
-//     charts: [],
-//   });
-//   const [loading, setLoading] = useState(true);
-//   const [refreshing, setRefreshing] = useState(false);
-//   const { width } = Dimensions.get('window');
-
-//   useEffect(() => {
-//     loadData();
-//   }, [selectedLanguage]);
-
-//   const loadData = async () => {
-//     setLoading(true);
-//     const [songsData, modulesData] = await Promise.all([
-//       fetchSongs(selectedLanguage),
-//       fetchModules(selectedLanguage),
-//     ]);
-//     setSongs(songsData);
-//     setModules(modulesData);
-//     setLoading(false);
-//   };
-
-//   const onRefresh = async () => {
-//     setRefreshing(true);
-//     await loadData();
-//     setRefreshing(false);
-//   };
-
-//   if (loading) {
-//     return (
-//       <View className="flex-1 bg-slate-950 justify-center items-center">
-//         <ActivityIndicator size="large" color="#10b981" />
-//       </View>
-//     );
-//   }
-
-//   return (
-//     <View className="flex-1 bg-slate-950">
-//       <StatusBar barStyle="light-content" backgroundColor="#020617" />
-//       <SafeAreaView edges={['top']} className="flex-1">
-//         {/* Header */}
-//         <View className="px-6 pt-3 pb-3">
-//           <View className="flex-row items-center justify-evenly mb-2">
-//             {/* App Name */}
-//             <Text
-//               className="text-white text-[6vw]  font-extrabold tracking-wide text-center"
-//               style={{ letterSpacing: 0.6 }}
-//               numberOfLines={1}
-//             >
-//               The Ultimate Songs
-//             </Text>
-
-//             {/* Made by */}
-//             <View className="items-center">
-//               <Text className="text-emerald-400 font-semibold tracking-wide text-[2vw]">
-//                 Made by
-//               </Text>
-//               <Text className="text-emerald-400 font-bold text-[3vw] tracking-wider">
-//                 Harsh Patel
-//               </Text>
-//             </View>
-//           </View>
-
-//           {/* Language Dropdown */}
-//           <View className="mt-1">
-//             <LanguageDropdown
-//               selected={selectedLanguage}
-//               onSelect={setSelectedLanguage}
-//             />
-//           </View>
-//         </View>
-
-//         {/* Songs Sections */}
-//         <ScrollView
-//           showsVerticalScrollIndicator={false}
-//           refreshControl={
-//             <RefreshControl
-//               refreshing={refreshing}
-//               onRefresh={onRefresh}
-//               tintColor="#10b981"
-//             />
-//           }
-//         >
-//           <View className="px-6 pb-32">
-//             <Section title="Trending Songs" icon="fire">
-//               <HorizontalSongList
-//                 songs={songs}
-//                 onPlay={song => playSong(song, songs)}
-//                 currentSong={currentSong}
-//                 likedSongs={likedSongs}
-//                 updateLikedSongs={updateLikedSongs}
-//               />
-//             </Section>
-
-//             <Section title="Top Charts" icon="chart">
-//               <HorizontalSongList
-//                 songs={modules.charts}
-//                 onCardPress={openPlaylistDetails}
-//                 currentSong={currentSong}
-//                 isChart
-//               />
-//             </Section>
-
-//             <Section title="Curated Playlists" icon="playlist">
-//               <HorizontalSongList
-//                 songs={modules.playlists}
-//                 onCardPress={openPlaylistDetails}
-//                 currentSong={currentSong}
-//                 isPlaylist
-//               />
-//             </Section>
-
-//             <Section title="New Albums" icon="disc">
-//               <HorizontalSongList
-//                 songs={modules.albums}
-//                 onCardPress={openAlbumDetails}
-//                 currentSong={currentSong}
-//                 isAlbum
-//               />
-//             </Section>
-//           </View>
-//         </ScrollView>
-//       </SafeAreaView>
-//     </View>
-//   );
-// }
-
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -345,6 +18,7 @@ import {
   fetchUniqueSuggestedSongs,
 } from '../services/api';
 import { GithubIcon, InstagramIcon } from '../components/icons';
+import { getRecentlyPlayedSongs } from '../utils/storage';
 
 export default function Home({
   playSong,
@@ -357,6 +31,7 @@ export default function Home({
   const [selectedLanguage, setSelectedLanguage] = useState('hindi');
   const [songs, setSongs] = useState([]);
   const [songsSug, setSongsSug] = useState([]);
+  const [recentlyPlayed, setRecentlyPlayed] = useState([]);
   const [modules, setModules] = useState({
     albums: [],
     playlists: [],
@@ -368,6 +43,13 @@ export default function Home({
   useEffect(() => {
     loadData();
   }, [selectedLanguage]);
+
+  useEffect(() => {
+    (async () => {
+      const recents = await getRecentlyPlayedSongs();
+      setRecentlyPlayed(recents);
+    })();
+  }, [currentSong]);
 
   // const loadData = async () => {
   //   setLoading(true);
@@ -440,20 +122,20 @@ export default function Home({
         <StatusBar barStyle="light-content" backgroundColor="#020617" />
         <SafeAreaView edges={['top']} style={{ flex: 1 }}>
           <View
-            style={{ paddingHorizontal: 24, paddingTop: 14, paddingBottom: 12 }}
+            style={{ paddingHorizontal: 24, paddingTop: 0, paddingBottom: 0 }}
           >
             <View
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginBottom: 8,
+                marginBottom: 0,
               }}
             >
               <Text
                 style={{
-                  color: '#0000',
-                  backgroundColor: '#6ee7b7',
+                  color: '#fff',
+                  // backgroundColor: '#6ee7b7',
                   padding: 5,
                   marginRight: 5,
                   borderRadius: 8,
@@ -471,7 +153,7 @@ export default function Home({
                   style={{
                     color: '#10b981',
                     fontWeight: '600',
-                    fontSize: 13,
+                    fontSize: 10,
                     letterSpacing: 1,
                   }}
                 >
@@ -481,8 +163,8 @@ export default function Home({
                   style={{
                     color: '#10b981',
                     fontWeight: 'bold',
-                    fontSize: 15,
-                    letterSpacing: 2,
+                    fontSize: 10,
+                    letterSpacing: 1,
                   }}
                 >
                   Harsh Patel
@@ -513,20 +195,20 @@ export default function Home({
       <StatusBar barStyle="light-content" backgroundColor="#020617" />
       <SafeAreaView edges={['top']} style={{ flex: 1 }}>
         <View
-          style={{ paddingHorizontal: 24, paddingTop: 14, paddingBottom: 12 }}
+          style={{ paddingHorizontal: 24, paddingTop: 0, paddingBottom: 0 }}
         >
           <View
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              justifyContent: 'space-evenly',
-              marginBottom: 8,
+              justifyContent: 'center',
+              marginBottom: 0,
             }}
           >
             <Text
               style={{
-                color: '#0000',
-                backgroundColor: '#6ee7b7',
+                color: '#fff',
+                // backgroundColor: '#6ee7b7',
                 padding: 5,
                 borderRadius: 8,
                 fontSize: 23,
@@ -538,7 +220,7 @@ export default function Home({
             >
               The Ultimate Songs
             </Text>
-            <View
+            {/* <View
               style={{ alignItems: 'center', flexDirection: 'row', gap: 10 }}
             >
               <TouchableOpacity
@@ -561,7 +243,7 @@ export default function Home({
               >
                 <GithubIcon size={30} color="#fff" />
               </TouchableOpacity>
-            </View>
+            </View> */}
           </View>
           <View style={{ marginTop: 4 }}>
             <LanguageDropdown
@@ -581,6 +263,17 @@ export default function Home({
           }
         >
           <View style={{ paddingHorizontal: 24, paddingBottom: 250 }}>
+            {recentlyPlayed.length > 0 && (
+              <Section title="Recently Played">
+                <HorizontalSongList
+                  songs={recentlyPlayed}
+                  onPlay={song => playSong(song, recentlyPlayed)}
+                  currentSong={currentSong}
+                  likedSongs={likedSongs}
+                  updateLikedSongs={updateLikedSongs}
+                />
+              </Section>
+            )}
             <Section title="Trending Songs">
               <HorizontalSongList
                 songs={songs}
@@ -591,7 +284,29 @@ export default function Home({
               />
             </Section>
             {songsSug.length > 0 && (
-              <Section title={`Songs For You`}>
+              // <Section title={`Songs For You`}>
+              //   <HorizontalSongList
+              //     songs={songsSug}
+              //     onPlay={song => playSong(song, songsSug)}
+              //     currentSong={currentSong}
+              //     likedSongs={likedSongs}
+              //     updateLikedSongs={updateLikedSongs}
+              //   />
+              // </Section>
+              <Section>
+                <View style={{ marginBottom: 8, marginTop: -20 }}>
+                  <Text
+                    style={{ fontSize: 22, fontWeight: 'bold', color: 'white' }}
+                  >
+                    Songs For You
+                  </Text>
+                  <Text
+                    style={{ fontSize: 12, color: '#9ca3af', marginTop: 2 }}
+                  >
+                    (based on your liked songs)
+                  </Text>
+                </View>
+
                 <HorizontalSongList
                   songs={songsSug}
                   onPlay={song => playSong(song, songsSug)}
@@ -632,6 +347,28 @@ export default function Home({
             and songs are the property of their respective owners. This site is
             for educational purposes only.
           </Text>
+          <View style={{ alignItems: 'center',justifyContent:'center', flexDirection: 'row', gap: 10,marginBottom:10 }}>
+            <TouchableOpacity
+              onPress={() => {
+                const url = 'https://instagram.com/patelharsh.in';
+                Linking.openURL(url).catch(err =>
+                  console.error("Couldn't load page", err),
+                );
+              }}
+            >
+              <InstagramIcon size={30} color="#d62976" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                const url = 'https://github.com/patelharsh80874/THE-ULTIMATE-SONGS-APP-ANDROID-IOS';
+                Linking.openURL(url).catch(err =>
+                  console.error("Couldn't load page", err),
+                );
+              }}
+            >
+              <GithubIcon size={30} color="#fff" />
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </SafeAreaView>
     </View>
