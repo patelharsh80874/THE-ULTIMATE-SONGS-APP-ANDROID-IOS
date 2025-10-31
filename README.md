@@ -20,22 +20,21 @@ A modern cross-platform music streaming app built with React Native CLI! This ap
 
 ## 📱 App Preview
 
-
-
-<img width="200" height="750" alt="Screenshot_1760509761" src="https://github.com/user-attachments/assets/55ed1e82-d254-46a7-9471-2ae99b4e4595" />
-
-<img width="200" height="750" alt="Screenshot_1760509779" src="https://github.com/user-attachments/assets/c00ef936-6b99-4420-81ed-28f95ed50444" />
-
-<img width="200" height="750" alt="Screenshot_1760509794" src="https://github.com/user-attachments/assets/973ff635-2f70-4bd5-8458-e19753d27b27" />
+<img width="180" height="750" alt="Screenshot_1761897947" src="https://github.com/user-attachments/assets/595c817f-39fa-4523-be7c-31ff0f3d3c1e" />
+<img width="180" height="750" alt="Screenshot_1761898209" src="https://github.com/user-attachments/assets/69128e59-a77e-4908-a7ad-0c7a6e0837b2" />
+<img width="180" height="750" alt="Screenshot_1761898042" src="https://github.com/user-attachments/assets/8aaf2c4a-c960-446c-8196-ac86d99347f0" />
+<img width="180" height="750" alt="Screenshot_1761913115" src="https://github.com/user-attachments/assets/a760e45a-a0c5-4ea2-b026-f27db8680d4a" />
+<img width="180" height="750" alt="Screenshot_1760509794" src="https://github.com/user-attachments/assets/973ff635-2f70-4bd5-8458-e19753d27b27" />
 
 
 ---
 
 ## 🚀 Features
 
-- 🎧 **Full music player:** Mini & fullscreen playback with seek, skip, and pause  
+- 🎧 **Full music player:** Mini & fullscreen playback with seek, skip, pause and add to playlist button 
 - 🔍 **Search songs, albums, playlists, artists**  
-- ❤️ **Like and save** your favorite tracks locally  
+- ❤️ **Like and save** your favorite tracks locally
+- 📋 **Custom Playlists:** create, edit, delete playlists based on your preferences
 - ⬇️ **Download songs** for offline listening  
 - 🔄 **Background playback** with device control panel integration (Android notification/lock screen, see screenshot)   
 - 📱 Android ready; **iOS version coming soon**  
@@ -55,7 +54,7 @@ A modern cross-platform music streaming app built with React Native CLI! This ap
 | UI Styling    | NativeWind                          |
 | HTTP Client   | Axios                               |
 | Storage       | AsyncStorage                        |
-| API           | [Unofficial JioSaavn API](https://saavn.dev) |
+| API           | [Unofficial JioSaavn API](https://saavn.sumit.co) |
 | Platform      | Android (iOS coming soon)           |
 
 ---
@@ -142,7 +141,7 @@ Use, modify, and distribute freely — with credit to the original author.
 
 ## 🌟 Acknowledgements
 
-- 🎵 [JioSaavn API (Unofficial)](https://saavn.dev/) for music data
+- 🎵 [JioSaavn API (Unofficial)](https://saavn.sumit.co) for music data
 - 💻 React Native Community
 
 ---
