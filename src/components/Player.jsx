@@ -518,8 +518,7 @@ container: {
     left: 0,
     right: 0,
     zIndex: 50, // ensures it’s above everything
-    // backgroundColor: '#111827',
-    backgroundColor: '#1f2937',
+    backgroundColor: '#1e293b',
     // important: handle both gesture and 3-button nav
     paddingBottom: Platform.OS === 'android' ? 115 : 83,
     elevation: 20,
@@ -531,7 +530,7 @@ container: {
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 7,
-    backgroundColor: '#1f2937',
+    backgroundColor: '#1e293b',
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
   },
