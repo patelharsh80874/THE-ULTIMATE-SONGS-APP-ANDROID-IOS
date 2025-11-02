@@ -237,7 +237,7 @@ export default function Likes({
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#020617' }}>
+    <SafeAreaView style={{ flex: 1,marginBottom:-50, backgroundColor: '#020617' }}>
       <View
         style={{
           flexDirection: 'row',
@@ -293,7 +293,7 @@ export default function Likes({
           />
         )
       ) : (
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
+        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 300 }}>
           {customPlaylists.length === 0 ? (
             <View style={{ paddingVertical: 20, alignItems: 'center' }}>
               <Text style={{ color: '#6b7280' }}>No playlists found</Text>

@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {Platform} from 'react-native';
+import {Platform, StyleSheet, View} from 'react-native';
 import {AudioPro, AudioProEventType} from 'react-native-audio-pro';
 import {
   HomeIcon,
@@ -21,7 +21,7 @@ import Albums from '../screens/Albums';
 import AlbumDetails from '../screens/AlbumDetails';
 import Likes from '../screens/Likes';
 import Player from '../components/Player';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {addToRecentlyPlayed, getLikedSongs} from '../utils/storage';
 import {playTrack} from '../services/audioService';
 
@@ -167,6 +167,7 @@ export default function AppNavigator() {
   };
 
   return (
+    <View style={styles.root}>
     <NavigationContainer>
       <Tab.Navigator
         screenOptions={({route}) => ({
@@ -199,12 +200,10 @@ export default function AppNavigator() {
             shadowOffset: {width: 0, height: -4},
             shadowOpacity: 0.3,
             shadowRadius: 12,
-            height: Platform.OS === 'ios' ? 88 + insets.bottom : 70 + insets.bottom,
+            height: Platform.OS === 'ios' ? 88 + insets.bottom : 75 + insets.bottom,
             paddingBottom: insets.bottom,
             paddingTop: 10,
             zIndex: 51,
-            // borderTopLeftRadius: 24,
-            // borderTopRightRadius: 24,
           },
           tabBarLabelStyle: {
             fontSize: 11,
@@ -348,6 +347,15 @@ export default function AppNavigator() {
         />
       )}
     </NavigationContainer>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    flexDirection:'column-reverse',
+    backgroundColor: '#0f172a',
+  },
+});
 

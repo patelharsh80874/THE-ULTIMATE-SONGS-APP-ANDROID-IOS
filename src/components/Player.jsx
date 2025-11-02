@@ -367,7 +367,7 @@ export default function Player({
 
   return (
     <Animated.View style={[styles.container, { transform: [{ translateY: slideAnim }, { scale: scaleAnim }], opacity: fadeAnim }]}>
-      {/* Mini Player */}
+    {/* Mini Player  */}
       {isMinimized ? (
         <Animated.View style={[styles.miniPlayer, { transform: [{ translateY: slideAnim }, { scale: scaleAnim }], opacity: fadeAnim }]}>
     <TouchableOpacity onPress={toggleMinimize} style={styles.miniPlayer}>
@@ -512,22 +512,26 @@ export default function Player({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    // backgroundColor: '#1e293b',
+container: {
     position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 83 : 65,
+    bottom: 0,
     left: 0,
     right: 0,
-    zIndex: 50,
+    zIndex: 50, // ensures it’s above everything
+    // backgroundColor: '#111827',
+    backgroundColor: '#1f2937',
+    // important: handle both gesture and 3-button nav
+    paddingBottom: Platform.OS === 'android' ? 115 : 83,
+    elevation: 20,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
   },
-
   miniPlayer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1e293b',
-    padding: 5,
-    // paddingBottom:15,
+    justifyContent: 'space-between',
+    padding: 7,
+    backgroundColor: '#1f2937',
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
   },
@@ -546,14 +550,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#1e293b',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    // paddingBottom:35,
-    // borderRadius:20,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
     shadowColor: '#000',
     shadowOpacity: 0.3,
     shadowRadius: 15,
     shadowOffset: { width: 0, height: -8 },
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+
   },
   header: {
     flexDirection: 'row',
