@@ -20,24 +20,95 @@ A modern cross-platform music streaming app built with React Native CLI! This ap
 
 ## 📱 App Preview
 
-<img width="180" height="750" alt="Screenshot_1761897947" src="https://github.com/user-attachments/assets/595c817f-39fa-4523-be7c-31ff0f3d3c1e" />
-<img width="180" height="750" alt="Screenshot_1761898209" src="https://github.com/user-attachments/assets/69128e59-a77e-4908-a7ad-0c7a6e0837b2" />
-<img width="180" height="750" alt="Screenshot_1761898042" src="https://github.com/user-attachments/assets/8aaf2c4a-c960-446c-8196-ac86d99347f0" />
-<img width="180" height="750" alt="Screenshot_1761913115" src="https://github.com/user-attachments/assets/a760e45a-a0c5-4ea2-b026-f27db8680d4a" />
-<img width="180" height="750" alt="Screenshot_1760509794" src="https://github.com/user-attachments/assets/973ff635-2f70-4bd5-8458-e19753d27b27" />
-
+<img width="160" height="750" alt="Screenshot_1769072676" src="https://github.com/user-attachments/assets/adc08b71-cd63-4146-a947-8a88b9097d0c" />
+<img width="160" height="750" alt="Screenshot_1769072856" src="https://github.com/user-attachments/assets/b49ec9fc-3b2c-4214-a5ca-78317d6de6dd" />
+<img width="160" height="750" alt="Screenshot_1761898042" src="https://github.com/user-attachments/assets/8aaf2c4a-c960-446c-8196-ac86d99347f0" />
+<img width="160" height="750" alt="Screenshot_1769072907" src="https://github.com/user-attachments/assets/3404a620-d903-4d90-95b7-2e5837fb22ec" />
+<img width="160" height="750" alt="Screenshot_1769072941" src="https://github.com/user-attachments/assets/7b05ff9a-d8c8-4c36-b313-eb5046256cd1" />
+<img width="160" height="750" alt="Screenshot_1769072953" src="https://github.com/user-attachments/assets/cdb10991-d0e1-467d-ae64-3ec14911b8f0" />
 
 ---
 
-## 🚀 Features
+## 🚀 Features (Updated – New Version)
 
-- 🎧 **Full music player:** Mini & fullscreen playback with seek, skip, pause and add to playlist button 
-- 🔍 **Search songs, albums, playlists, artists**  
-- ❤️ **Like and save** your favorite tracks locally
-- 📋 **Custom Playlists:** create, edit, delete playlists based on your preferences
-- ⬇️ **Download songs** for offline listening  
-- 🔄 **Background playback** with device control panel integration (Android notification/lock screen, see screenshot)   
-- 📱 Android ready; **iOS version coming soon**  
+* 🎧 **Advanced Music Player**
+
+  * Mini & fullscreen playback
+  * Seek, skip, pause/play
+  * Add to playlist & queue
+  * Background playback with system controls (lock screen / notification)
+
+* 📜 **Smart Queue System (NEW ✨)**
+
+  * Dedicated **Queue feature**
+  * **Reorder songs using drag & drop**
+  * Smooth real-time queue updates
+
+* 🔍 **Powerful Search**
+
+  * Search **songs, albums, playlists, artists**
+  * Search inside **custom playlists**
+  * Fast & optimized results
+
+* ❤️ **Like & Save Songs**
+
+  * Store favorite tracks locally
+  * Persistent data using MMKV (High-performance local storage) 🚀
+
+* 📋 **Custom Playlists (Enhanced ✨)**
+
+  * Create, edit & delete playlists
+  * **Dedicated playlist page**
+  * **Reorder playlist songs using drag & drop**
+  * **Search songs inside a playlist**
+
+* 📥 **Import Custom Playlists (NEW ✨)**
+
+  * Import your own custom playlists
+  * Seamless integration with existing data
+
+* 📻 **Radio Stations (NEW ✨)**
+
+  * Category-based radio stations:
+
+    * 🎶 Hindi And Others
+    * 🎤 Artists
+    * 🎬 Actors
+  * Continuous playback experience
+
+* ⬇️ **Offline Downloads**
+
+  * Download songs for offline listening
+
+* 🔄 **Background Playback**
+
+  * Works even when app is minimized
+  * Integrated with Android system media controls
+
+* 📱 **Platform Support**
+
+  * ✅ Android fully supported
+  * 🍎 iOS version **coming soon**
+
+---
+
+## 🆕 What’s New in Latest Update
+
+✨ **New & Improved Features**
+
+* ✅ Queue system with **drag & drop reordering**
+* ✅ Dedicated custom playlist page
+* ✅ Playlist song reorder with drag & drop
+* ✅ Search inside custom playlists
+* ✅ Import custom playlists
+* ✅ Radio stations (Hindi And Others, Artists, Actors)
+* 🚀 **Storage upgraded from AsyncStorage to MMKV**
+
+  * Faster data access
+  * Better performance for large playlists
+  * Improved app responsiveness
+  
+🚀 This update focuses on **better music control, personalization, and smoother user experience**.
 
 ## ⬇️ Download
 
@@ -53,7 +124,7 @@ A modern cross-platform music streaming app built with React Native CLI! This ap
 | Framework     | React Native                        |
 | UI Styling    | NativeWind                          |
 | HTTP Client   | Axios                               |
-| Storage       | AsyncStorage                        |
+| Storage       | MMKV (High-performance local storage) 🚀                        |
 | API           | [Unofficial JioSaavn API](https://saavn.sumit.co) |
 | Platform      | Android (iOS coming soon)           |
 
@@ -146,6 +217,11 @@ Use, modify, and distribute freely — with credit to the original author.
 
 ---
 
-**This README provides a complete reference and setup guide for The Ultimate Songs App, built for learning and demo purposes.**
 
----
+
+
+
+
+
+
+
