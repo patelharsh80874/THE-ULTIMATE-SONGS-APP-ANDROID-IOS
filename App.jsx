@@ -1,3 +1,5 @@
+import 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import React from 'react';
 import { StatusBar, Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -7,6 +9,7 @@ import './global.css';
 
 export default function App() {
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <SafeAreaProvider>
       {/* StatusBar: Keep it opaque for Android, translucent only if you want content under statusbar */}
       <StatusBar
@@ -16,6 +19,7 @@ export default function App() {
       />
       <AppNavigator />
     </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 

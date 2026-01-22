@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,21 +9,39 @@ import {
   StatusBar,
   Dimensions,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import axios from 'axios';
-import {HeartIcon, PlayIcon, ArrowLeftIcon} from '../components/icons';
-import {likeSong, unlikeSong, isSongLiked} from '../utils/storage';
+import {
+  HeartIcon,
+  PlayIcon,
+  ArrowLeftIcon,
+  PlaylistIcon,
+  EllipsisVerticalIcon,
+} from '../components/icons';
+import { likeSong, unlikeSong, isSongLiked } from '../utils/storage';
+import PlaylistModal from '../components/PlaylistModal';
+import SongOptionsBottomSheet from '../components/SongOptionsBottomSheet';
+import { playTrack } from '../services/audioService';
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 export default function ArtistDetails({
   artistId,
   onBack,
   playSong,
   currentSong,
+  setCurrentSong,
   likedSongs,
   updateLikedSongs,
+  songQueue,
+  setSongQueue,
+  hasRadioQueue,
+  setHasRadioQueue,
+  CustomPlaylistUpdated,
+  setCustomPlaylistUpdated,
+  settings,
 }) {
+  const PlayFullPlaylist = true;
   const [songs, setSongs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -31,10 +49,24 @@ export default function ArtistDetails({
   const [hasMore, setHasMore] = useState(true);
   const [total, setTotal] = useState(0);
   const seenSongIds = useRef(new Set());
+  const [selectedSong, setSelectedSong] = useState(null);
+  const [isPlaylistModalVisible, setPlaylistModalVisible] = useState(false);
+
+  const [sheetVisible, setSheetVisible] = useState(false);
+  const [sheetSong, setSheetSong] = useState(null);
+
+  const openSheet = song => {
+    setSheetSong(song);
+    setSheetVisible(true);
+  };
+  const closeSheet = () => {
+    setSheetVisible(false);
+    setSheetSong(null);
+  };
 
   useEffect(() => {
     if (artistId) {
-      fetchArtistSongs(1, false);
+      fetchArtistSongs(0, false);
     }
   }, [artistId]);
 
@@ -105,22 +137,52 @@ export default function ArtistDetails({
     await updateLikedSongs();
   };
 
-  const renderSongItem = ({item, index}) => {
+  const openPlaylistModal = song => {
+    setSelectedSong(song);
+    setPlaylistModalVisible(true);
+  };
+
+  const closePlaylistModal = () => setPlaylistModalVisible(false);
+
+  // ✅ Add to Queue (Play Next)
+  const handleAddToQueue = song => {
+    if (!songQueue || !Array.isArray(songQueue)) return;
+
+    const currentIndex = songQueue.findIndex(s => s.id === currentSong?.id);
+    const newQueue = [...songQueue.filter(s => s.id !== song.id)]; // avoid duplicates
+    // insert just after the currently playing song
+    if (currentIndex >= 0) newQueue.splice(currentIndex + 1, 0, song);
+    else newQueue.push(song);
+    setSongQueue(newQueue);
+  };
+
+  const handlePlayNow = async nextSong => {
+    handleAddToQueue(nextSong);
+    setCurrentSong(nextSong);
+    await playTrack(nextSong);
+  };
+
+  const renderSongItem = ({ item, index }) => {
     const isPlaying = currentSong && currentSong.id === item.id;
     const isLiked = isSongLiked(item.id, likedSongs);
 
     return (
       <TouchableOpacity
-        onPress={() => playSong(item, songs)}
+        onPress={() => {
+          playSong(item, songs);
+          setHasRadioQueue(false);
+        }}
         className="mb-3"
-        activeOpacity={0.8}>
+        activeOpacity={0.8}
+      >
         <View
           className={`flex-row items-center p-4 rounded-2xl ${
             isPlaying
               ? 'bg-emerald-900/40 border-2 border-emerald-500/50'
               : 'bg-gray-900/60 border border-gray-800'
-          }`}>
-          <View
+          }`}
+        >
+          {/* <View
             className={`w-10 h-10 rounded-xl ${
               isPlaying ? 'bg-emerald-600' : 'bg-gray-800'
             } justify-center items-center mr-3`}>
@@ -130,11 +192,11 @@ export default function ArtistDetails({
               }`}>
               {index + 1}
             </Text>
-          </View>
+          </View> */}
 
           <View className="relative mr-3">
             <Image
-              source={{uri: item.image?.[2]?.url}}
+              source={{ uri: item.image?.[settings.imageQualityIndex]?.url }}
               className="w-16 h-16 rounded-xl"
               resizeMode="cover"
             />
@@ -150,8 +212,12 @@ export default function ArtistDetails({
               numberOfLines={1}
               className={`text-base font-bold ${
                 isPlaying ? 'text-emerald-300' : 'text-white'
-              }`}>
-              {item.name}
+              }`}
+            >
+              {item.name
+                ?.replace(/&quot;/g, '"')
+                ?.replace(/&#039;/g, "'")
+                ?.replace(/&amp;/g, '&')}
             </Text>
             <Text numberOfLines={1} className="text-gray-400 text-sm mt-1">
               {item.album?.name || 'Unknown Album'}
@@ -162,13 +228,45 @@ export default function ArtistDetails({
             onPress={() => handleLikeToggle(item.id)}
             className={`p-3 rounded-full ml-2 ${
               isLiked ? 'bg-emerald-500/20' : 'bg-gray-800'
-            }`}>
+            }`}
+          >
             <HeartIcon
               size={20}
               color={isLiked ? '#10b981' : '#9ca3af'}
               filled={isLiked}
             />
           </TouchableOpacity>
+          {!currentSong && (
+            <TouchableOpacity
+              onPress={() => openPlaylistModal(item)}
+              className={'p-3 rounded-full ml-2 bg-gray-800'}
+            >
+              <PlaylistIcon size={18} color="#fff" />
+            </TouchableOpacity>
+          )}
+          {/* ✅ Play Next Button */}
+          {/* {currentSong &&
+            <TouchableOpacity
+              onPress={() => handleAddToQueue(item)}
+              className="p-3 bg-gray-800 rounded-full ml-2"
+              activeOpacity={0.8}>
+              <Text className='text-xs text-[#10b981] font-bold'>Play Next</Text>
+            </TouchableOpacity> } */}
+
+          {/* ⋮ Menu Button */}
+          {currentSong && (
+            <TouchableOpacity
+              onPress={() => openSheet(item)}
+              style={{
+                padding: 8,
+                borderRadius: 100,
+                marginLeft: 6,
+                backgroundColor: '#1f2937',
+              }}
+            >
+              <EllipsisVerticalIcon size={20} color="#9ca3af" />
+            </TouchableOpacity>
+          )}
         </View>
       </TouchableOpacity>
     );
@@ -192,19 +290,33 @@ export default function ArtistDetails({
       firstSong?.artists?.primary?.[0]?.name || 'Unknown Artist';
 
     return (
-      <View className="items-center mb-6">
+      <View className="items-center justify-center  mb-6">
         {/* Artist Circular Image */}
         <Image
-          source={{uri: artistImage}}
-          style={{width: 150, height: 150}}
+          source={{ uri: artistImage }}
+          style={{ width: 150, height: 150 }}
           className="rounded-full mb-4"
           resizeMode="cover"
         />
         <Text className="text-white text-3xl font-bold mb-2">{artistName}</Text>
-        <View className="bg-emerald-500/20 px-4 py-2 rounded-full">
-          <Text className="text-emerald-400 text-sm font-bold">
-            {total} Songs Available
-          </Text>
+        <View className="flex-col gap-3 items-center justify-center">
+          <View className="px-4 py-2 rounded-full">
+            <Text className="text-emerald-400 text-sm font-bold">
+              {total} Songs Available
+            </Text>
+          </View>
+          <View className="bg-emerald-500/20 px-4 py-2 rounded-full ">
+            <TouchableOpacity
+              onPress={() => {
+                setHasRadioQueue(false);
+                playSong(songs[0], songs, PlayFullPlaylist);
+              }}
+            >
+              <Text className="text-emerald-400 text-sm font-bold">
+                ▶️ Play {artistName}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     );
@@ -227,10 +339,14 @@ export default function ArtistDetails({
         <View className="px-6 pt-4 pb-2 flex-row items-center">
           <TouchableOpacity
             onPress={onBack}
-            className="bg-gray-900 p-3 rounded-full mr-4">
+            className="bg-gray-900 p-3 rounded-full mr-4"
+          >
             <ArrowLeftIcon size={20} color="#fff" />
           </TouchableOpacity>
-          <Text className="text-white text-2xl font-bold flex-1" numberOfLines={1}>
+          <Text
+            className="text-white text-2xl font-bold flex-1"
+            numberOfLines={1}
+          >
             Artist Details
           </Text>
         </View>
@@ -239,7 +355,7 @@ export default function ArtistDetails({
           data={songs}
           renderItem={renderSongItem}
           keyExtractor={(item, index) => `${item.id}-${index}`}
-          contentContainerStyle={{paddingHorizontal: 24, paddingBottom: 120}}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
           onEndReached={loadMoreSongs}
           onEndReachedThreshold={0.5}
@@ -247,6 +363,22 @@ export default function ArtistDetails({
           ListFooterComponent={renderFooter}
         />
       </SafeAreaView>
+      <PlaylistModal
+        visible={isPlaylistModalVisible}
+        onClose={closePlaylistModal}
+        song={selectedSong}
+        onUpdated={() => setCustomPlaylistUpdated(!CustomPlaylistUpdated)}
+      />
+      <SongOptionsBottomSheet
+        isVisible={sheetVisible}
+        onClose={closeSheet}
+        song={sheetSong}
+        onAddToPlaylist={openPlaylistModal}
+        onPlayNext={handleAddToQueue}
+        HasThreeBT={false}
+        currentSong={currentSong}
+        handlePlayNow={handlePlayNow}
+      />
     </View>
   );
 }

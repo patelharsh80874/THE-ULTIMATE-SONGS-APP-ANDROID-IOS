@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,18 +10,36 @@ import {
   StatusBar,
   Keyboard,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import axios from 'axios';
-import {SearchIcon, HeartIcon, PlayIcon, CloseIcon} from '../components/icons';
-import {likeSong, unlikeSong, isSongLiked} from '../utils/storage';
-import {clearAudio} from '../services/audioService';
+import {
+  SearchIcon,
+  HeartIcon,
+  PlayIcon,
+  CloseIcon,
+  PlaylistIcon,
+  EllipsisVerticalIcon,
+} from '../components/icons';
+import { likeSong, unlikeSong, isSongLiked } from '../utils/storage';
+import { clearAudio } from '../services/audioService';
+import PlaylistModal from '../components/PlaylistModal';
+import SongOptionsBottomSheet from '../components/SongOptionsBottomSheet';
+import { playTrack } from '../services/audioService';
 
 export default function Search({
   playSong,
   currentSong,
+  setCurrentSong,
   likedSongs,
   updateLikedSongs,
   onClosePlayer, // New prop to close player
+  songQueue,
+  setSongQueue,
+  hasRadioQueue,
+  setHasRadioQueue,
+  CustomPlaylistUpdated,
+  setCustomPlaylistUpdated,
+  settings,
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [songs, setSongs] = useState([]);
@@ -31,6 +49,20 @@ export default function Search({
   const [hasMore, setHasMore] = useState(true);
   const seenSongIds = useRef(new Set());
   const cancelTokenSource = useRef(null);
+  const [selectedSong, setSelectedSong] = useState(null);
+  const [isPlaylistModalVisible, setPlaylistModalVisible] = useState(false);
+
+  const [sheetVisible, setSheetVisible] = useState(false);
+  const [sheetSong, setSheetSong] = useState(null);
+
+  const openSheet = song => {
+    setSheetSong(song);
+    setSheetVisible(true);
+  };
+  const closeSheet = () => {
+    setSheetVisible(false);
+    setSheetSong(null);
+  };
 
   // Search songs with axios
   const searchSongs = async (query, pageNum = 1, isLoadMore = false) => {
@@ -60,7 +92,7 @@ export default function Search({
           params: {
             query: query,
             page: pageNum,
-            limit: 40,
+            limit: 10,
           },
           cancelToken: cancelTokenSource.current.token,
           timeout: 10000,
@@ -108,16 +140,16 @@ export default function Search({
   // Handle search button press
   const handleSearchPress = () => {
     Keyboard.dismiss();
-    
+
     if (!searchQuery.trim()) {
       return;
     }
 
-    // Close player and clear queue
-    if (onClosePlayer) {
-      onClosePlayer();
-    }
-    clearAudio();
+    // // Close player and clear queue
+    // if (onClosePlayer) {
+    //   onClosePlayer();
+    // }
+    // clearAudio();
 
     // Clear previous data
     setSongs([]);
@@ -142,11 +174,11 @@ export default function Search({
       cancelTokenSource.current.cancel('Search cleared');
     }
 
-    // Close player
-    if (onClosePlayer) {
-      onClosePlayer();
-    }
-    clearAudio();
+    // // Close player
+    // if (onClosePlayer) {
+    //   onClosePlayer();
+    // }
+    // clearAudio();
   };
 
   // Load more songs (infinite scroll)
@@ -172,39 +204,75 @@ export default function Search({
     await updateLikedSongs();
   };
 
+  const openPlaylistModal = song => {
+    setSelectedSong(song);
+    setPlaylistModalVisible(true);
+  };
+
+  const closePlaylistModal = () => setPlaylistModalVisible(false);
+
+  // ✅ Add to Queue (Play Next)
+  const handleAddToQueue = song => {
+    if (!songQueue || !Array.isArray(songQueue)) return;
+
+    const currentIndex = songQueue.findIndex(s => s.id === currentSong?.id);
+    const newQueue = [...songQueue.filter(s => s.id !== song.id)]; // avoid duplicates
+    // insert just after the currently playing song
+    if (currentIndex >= 0) newQueue.splice(currentIndex + 1, 0, song);
+    else newQueue.push(song);
+    setSongQueue(newQueue);
+  };
+
+  const handlePlayNow = async nextSong => {
+    handleAddToQueue(nextSong);
+    setCurrentSong(nextSong);
+    await playTrack(nextSong);
+  };
+
   // Render song item
-  const renderSongItem = ({item, index}) => {
+  const renderSongItem = ({ item, index }) => {
     const isPlaying = currentSong && currentSong.id === item.id;
     const isLiked = isSongLiked(item.id, likedSongs);
 
     return (
       <TouchableOpacity
-        onPress={() => playSong(item, songs)}
+        onPress={() => {
+          playSong(item, songs);
+          setHasRadioQueue(false);
+        }}
         className="mb-3"
-        activeOpacity={0.8}>
+        activeOpacity={0.8}
+      >
         <View
           className={`flex-row items-center p-4 rounded-2xl ${
             isPlaying
               ? 'bg-emerald-900/40 border-2 border-emerald-500/50'
               : 'bg-gray-900/60 border border-gray-800'
-          }`}>
+          }`}
+        >
           {/* Rank Number */}
-          <View
+          {/* <View
             className={`w-10 h-10 rounded-xl ${
               isPlaying ? 'bg-emerald-600' : 'bg-gray-800'
-            } justify-center items-center mr-3`}>
+            } justify-center items-center mr-3`}
+          >
             <Text
               className={`text-sm font-bold ${
                 isPlaying ? 'text-white' : 'text-gray-400'
-              }`}>
+              }`}
+            >
               {index + 1}
             </Text>
-          </View>
+          </View>  */}
 
           {/* Album Art */}
           <View className="relative mr-3">
             <Image
-              source={{uri: item.image?.[2]?.url || item.image?.[2]?.link}}
+              source={{
+                uri:
+                  item.image?.[settings.imageQualityIndex]?.url ||
+                  item.image?.[settings.imageQualityIndex]?.link,
+              }}
               className="w-16 h-16 rounded-xl"
               resizeMode="cover"
             />
@@ -221,8 +289,12 @@ export default function Search({
               numberOfLines={1}
               className={`text-base font-bold ${
                 isPlaying ? 'text-emerald-300' : 'text-white'
-              }`}>
-              {item.name}
+              }`}
+            >
+              {item.name
+                ?.replace(/&quot;/g, '"')
+                ?.replace(/&#039;/g, "'")
+                ?.replace(/&amp;/g, '&')}
             </Text>
             <Text numberOfLines={1} className="text-gray-400 text-sm mt-1">
               {item.artists?.primary?.[0]?.name ||
@@ -236,13 +308,51 @@ export default function Search({
             onPress={() => handleLikeToggle(item.id)}
             className={`p-3 rounded-full ml-2 ${
               isLiked ? 'bg-emerald-500/20' : 'bg-gray-800'
-            }`}>
+            }`}
+          >
             <HeartIcon
               size={20}
               color={isLiked ? '#10b981' : '#9ca3af'}
               filled={isLiked}
             />
           </TouchableOpacity>
+
+          {!currentSong && (
+            <TouchableOpacity
+              onPress={() => openPlaylistModal(item)}
+              className={'p-3 rounded-full ml-2 bg-gray-800'}
+            >
+              <PlaylistIcon size={18} color="#fff" />
+            </TouchableOpacity>
+          )}
+          {/* 
+          {currentSong && (
+            <TouchableOpacity
+              onPress={() => handleAddToQueue(item)}
+              className="p-3 bg-gray-800 rounded-full ml-2"
+              activeOpacity={0.8}
+            >
+              
+              <Text className="text-xs text-[#10b981] font-bold">
+                Play Next
+              </Text>
+            </TouchableOpacity>
+          )} */}
+
+          {/* ⋮ Menu Button */}
+          {currentSong && (
+            <TouchableOpacity
+              onPress={() => openSheet(item)}
+              style={{
+                padding: 8,
+                borderRadius: 100,
+                marginLeft: 6,
+                backgroundColor: '#1f2937',
+              }}
+            >
+              <EllipsisVerticalIcon size={20} color="#9ca3af" />
+            </TouchableOpacity>
+          )}
         </View>
       </TouchableOpacity>
     );
@@ -336,7 +446,8 @@ export default function Search({
                   ? 'bg-emerald-600'
                   : 'bg-gray-800'
               }`}
-              activeOpacity={0.8}>
+              activeOpacity={0.8}
+            >
               {loading ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
@@ -364,7 +475,10 @@ export default function Search({
             data={songs}
             renderItem={renderSongItem}
             keyExtractor={(item, index) => `${item.id}-${index}`}
-            contentContainerStyle={{paddingHorizontal: 24, paddingBottom: 120}}
+            contentContainerStyle={{
+              paddingHorizontal: 24,
+              paddingBottom: 120,
+            }}
             showsVerticalScrollIndicator={false}
             onEndReached={loadMoreSongs}
             onEndReachedThreshold={0.5}
@@ -373,6 +487,22 @@ export default function Search({
           />
         )}
       </SafeAreaView>
+      <PlaylistModal
+        visible={isPlaylistModalVisible}
+        onClose={closePlaylistModal}
+        song={selectedSong}
+        onUpdated={() => setCustomPlaylistUpdated(!CustomPlaylistUpdated)}
+      />
+      <SongOptionsBottomSheet
+        isVisible={sheetVisible}
+        onClose={closeSheet}
+        song={sheetSong}
+        onAddToPlaylist={openPlaylistModal}
+        onPlayNext={handleAddToQueue}
+        HasThreeBT={false}
+        currentSong={currentSong}
+        handlePlayNow={handlePlayNow}
+      />
     </View>
   );
 }

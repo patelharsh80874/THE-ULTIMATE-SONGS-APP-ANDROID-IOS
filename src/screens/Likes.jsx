@@ -17,27 +17,63 @@ import {
   getCustomPlaylists,
   unlikeSong,
   saveCustomPlaylists,
+  saveLikedSongs,
 } from '../utils/storage';
 import { clearAudio } from '../services/audioService';
-import { CloseCircleFill, DisLikeIcon } from '../components/icons';
+import {
+  CloseCircleFill,
+  DisLikeIcon,
+  EllipsisVerticalIcon,
+  PlaylistIcon,
+} from '../components/icons';
+import DragList from 'react-native-draglist';
+import PlaylistModal from '../components/PlaylistModal';
+import SongOptionsBottomSheet from '../components/SongOptionsBottomSheet';
+import ImportJioSaavnModal from '../components/ImportJioSaavnModal';
+import { playTrack } from '../services/audioService';
 
 export default function Likes({
   playSong,
   currentSong,
+  setCurrentSong,
   likedSongs,
+  setLikedSongs,
   updateLikedSongs,
   onClosePlayer,
+  songQueue,
   setSongQueue,
+  hasRadioQueue,
+  setHasRadioQueue,
   CustomPlaylistUpdated,
+  setCustomPlaylistUpdated,
+  openCustomPlaylistDetails,
+  settings,
 }) {
   const [customPlaylists, setCustomPlaylists] = useState([]);
   const [expandedPlaylistId, setExpandedPlaylistId] = useState(null);
   const [activeTab, setActiveTab] = useState('liked');
 
+  const [selectedSong, setSelectedSong] = useState(null);
+  const [isPlaylistModalVisible, setPlaylistModalVisible] = useState(false);
+
   // Rename Modal States
   const [renameModalVisible, setRenameModalVisible] = useState(false);
   const [playlistToRename, setPlaylistToRename] = useState(null);
   const [newPlaylistName, setNewPlaylistName] = useState('');
+
+  const [sheetVisible, setSheetVisible] = useState(false);
+  const [sheetSong, setSheetSong] = useState(null);
+
+  const [isImportVisible, setIsImportVisible] = useState(false);
+
+  const openSheet = song => {
+    setSheetSong(song);
+    setSheetVisible(true);
+  };
+  const closeSheet = () => {
+    setSheetVisible(false);
+    setSheetSong(null);
+  };
 
   useEffect(() => {
     (async () => {
@@ -158,86 +194,35 @@ export default function Likes({
     setCustomPlaylists(updatedPlaylists); // UI update here
   };
 
-  const renderSong = (song, index, songsList, playlistId = null) => {
-    const isPlaying = currentSong && currentSong.id === song.id;
-    return (
-      <TouchableOpacity
-        key={song.id}
-        onPress={() => playSong(song, songsList)}
-        style={{
-          flexDirection: 'row',
-          padding: 12,
-          alignItems: 'center',
-          backgroundColor: isPlaying ? '#064e3b' : '#1f2937',
-          borderRadius: 16,
-          marginBottom: 12,
-          marginLeft: playlistId ? 16 : 0,
-        }}
-      >
-        <View
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
-            backgroundColor: isPlaying ? '#047857' : '#374151',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginRight: 12,
-          }}
-        >
-          <Text
-            style={{
-              color: isPlaying ? 'white' : '#9ca3af',
-              fontWeight: 'bold',
-            }}
-          >
-            {index + 1}
-          </Text>
-        </View>
-        <Image
-          source={{ uri: song.image?.[2]?.url || song.image?.[2]?.link }}
-          style={{ width: 64, height: 64, borderRadius: 12, marginRight: 12 }}
-        />
-        <View style={{ flex: 1 }}>
-          <Text
-            numberOfLines={1}
-            style={{
-              color: isPlaying ? '#a7f3d0' : 'white',
-              fontWeight: 'bold',
-              fontSize: 16,
-            }}
-          >
-            {song.name}
-          </Text>
-          <Text style={{ color: '#6b7280', fontSize: 12 }}>
-            {song.artists?.primary?.[0]?.name || 'Unknown Artist'}
-          </Text>
-        </View>
-        <TouchableOpacity
-          onPress={() => {
-            if (playlistId) {
-              handleRemoveSongFromPlaylist(playlistId, song.id);
-            } else {
-              handleRemoveLikedSong(song.id);
-            }
-          }}
-          style={{
-            padding: 8,
-            backgroundColor: '#b91c1c',
-            borderRadius: 100,
-            marginLeft: 12,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <DisLikeIcon size={20} color="#6ee7b7" />
-        </TouchableOpacity>
-      </TouchableOpacity>
-    );
+  const openPlaylistModal = song => {
+    setSelectedSong(song);
+    setPlaylistModalVisible(true);
+  };
+
+  const closePlaylistModal = () => setPlaylistModalVisible(false);
+
+  // ✅ Add to Queue (Play Next)
+  const handleAddToQueue = song => {
+    if (!songQueue || !Array.isArray(songQueue)) return;
+
+    const currentIndex = songQueue.findIndex(s => s.id === currentSong?.id);
+    const newQueue = [...songQueue.filter(s => s.id !== song.id)]; // avoid duplicates
+    // insert just after the currently playing song
+    if (currentIndex >= 0) newQueue.splice(currentIndex + 1, 0, song);
+    else newQueue.push(song);
+    setSongQueue(newQueue);
+  };
+
+  const handlePlayNow = async nextSong => {
+    handleAddToQueue(nextSong);
+    setCurrentSong(nextSong);
+    await playTrack(nextSong);
   };
 
   return (
-    <SafeAreaView style={{ flex: 1,marginBottom:-50, backgroundColor: '#020617' }}>
+    <SafeAreaView
+      style={{ flex: 1, marginBottom: -50, backgroundColor: '#020617' }}
+    >
       <View
         style={{
           flexDirection: 'row',
@@ -279,12 +264,151 @@ export default function Likes({
             </Text>
           </View>
         ) : (
-          <FlatList
+          <DragList
             data={likedSongs}
             keyExtractor={item => item.id}
-            renderItem={({ item, index }) =>
-              renderSong(item, index, likedSongs)
-            }
+            onReordered={async (fromIndex, toIndex) => {
+              const updated = [...likedSongs];
+              const moved = updated.splice(fromIndex, 1)[0];
+              updated.splice(toIndex, 0, moved);
+              setLikedSongs(updated);
+
+              // ✅ persist new order
+              await saveLikedSongs(updated);
+            }}
+            renderItem={({
+              item: song,
+              onDragStart,
+              onDragEnd,
+              isActive,
+              index,
+            }) => {
+              const isPlaying = currentSong && currentSong.id === song.id;
+              return (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    padding: 12,
+                    alignItems: 'center',
+                    backgroundColor: isPlaying
+                      ? '#064e3b'
+                      : 'rgb(17 24 39 / 0.6)',
+                    borderRadius: 16,
+                    marginBottom: 12,
+                  }}
+                >
+                  {/* ☰ drag handle */}
+                  {!currentSong && (
+                    <TouchableOpacity
+                      onPressIn={onDragStart}
+                      onPressOut={onDragEnd}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      style={{
+                        paddingHorizontal: 6,
+                        paddingVertical: 8,
+                        marginRight: 8,
+                      }}
+                    >
+                      <Text style={{ color: '#888', fontSize: 20 }}>☰</Text>
+                    </TouchableOpacity>
+                  )}
+
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => {
+                      playSong(song, likedSongs);
+                      setHasRadioQueue(false);
+                    }}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      flex: 1,
+                    }}
+                  >
+                    <Image
+                      source={{
+                        uri:
+                          song.image?.[settings.imageQualityIndex]?.url ||
+                          song.image?.[settings.imageQualityIndex]?.link,
+                      }}
+                      style={{
+                        width: 64,
+                        height: 64,
+                        borderRadius: 12,
+                        marginRight: 12,
+                      }}
+                    />
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        numberOfLines={1}
+                        style={{
+                          color: isPlaying ? '#a7f3d0' : 'white',
+                          fontWeight: 'bold',
+                          fontSize: 16,
+                        }}
+                      >
+                        {song.name
+                          ?.replace(/&quot;/g, '"')
+                          ?.replace(/&#039;/g, "'")
+                          ?.replace(/&amp;/g, '&')}
+                      </Text>
+                      <Text style={{ color: '#6b7280', fontSize: 12 }}>
+                        {song.artists?.primary?.[0]?.name || 'Unknown Artist'}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => handleRemoveLikedSong(song.id)}
+                    style={{
+                      padding: 8,
+                      backgroundColor: '#b91c1c',
+                      borderRadius: 100,
+                      marginLeft: 12,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <DisLikeIcon size={20} color="#6ee7b7" />
+                  </TouchableOpacity>
+                  {!currentSong && (
+                    <TouchableOpacity
+                      onPress={() => openPlaylistModal(song)}
+                      className={'p-3 rounded-full ml-2 bg-gray-800'}
+                    >
+                      <PlaylistIcon size={18} color="#fff" />
+                    </TouchableOpacity>
+                  )}
+
+                  {/* {currentSong && (
+                    <TouchableOpacity
+                      onPress={() => handleAddToQueue(song)}
+                      className="p-3 bg-gray-800 rounded-full ml-2"
+                      activeOpacity={0.8}
+                    >
+                      <Text className="text-xs text-[#10b981] font-bold">
+                        Play Next
+                      </Text>
+                    </TouchableOpacity>
+                  )} */}
+
+                  {/* ⋮ Menu Button */}
+                  {currentSong && (
+                    <TouchableOpacity
+                      onPress={() => openSheet(song)}
+                      style={{
+                        padding: 8,
+                        borderRadius: 100,
+                        marginLeft: 6,
+                        backgroundColor: '#1f2937',
+                      }}
+                    >
+                      <EllipsisVerticalIcon size={20} color="#9ca3af" />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              );
+            }}
             contentContainerStyle={{
               paddingBottom: 300,
               paddingTop: 10,
@@ -294,6 +418,28 @@ export default function Likes({
         )
       ) : (
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 300 }}>
+          {activeTab === 'playlists' && (
+            <TouchableOpacity
+              onPress={() => setIsImportVisible(true)}
+              style={{
+                backgroundColor: '#0ea5e9',
+                padding: 12,
+                borderRadius: 10,
+                marginHorizontal: 16,
+                marginBottom: 12,
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Text
+                style={{ color: 'white', fontWeight: 'bold', fontSize: 13 }}
+              >
+                Import your custom playlist from JioSaavn
+              </Text>
+            </TouchableOpacity>
+          )}
+
           {customPlaylists.length === 0 ? (
             <View style={{ paddingVertical: 20, alignItems: 'center' }}>
               <Text style={{ color: '#6b7280' }}>No playlists found</Text>
@@ -323,11 +469,9 @@ export default function Likes({
                   }}
                 >
                   <TouchableOpacity
-                    onPress={() =>
-                      setExpandedPlaylistId(
-                        expandedPlaylistId === pl.id ? null : pl.id,
-                      )
-                    }
+                    key={pl.id}
+                    activeOpacity={0.8}
+                    onPress={() => openCustomPlaylistDetails(pl.id)}
                     style={{ flex: 1 }}
                   >
                     <Text
@@ -372,145 +516,6 @@ export default function Likes({
                     </Text>
                   </TouchableOpacity>
                 </View>
-
-                {expandedPlaylistId === pl.id &&
-                  (pl.songs.length === 0 ? (
-                    <Text
-                      style={{ color: '#6b7280', marginTop: 6, marginLeft: 12 }}
-                    >
-                      No songs in this playlist.
-                    </Text>
-                  ) : (
-                    pl.songs.map((song, idx) => (
-                        <TouchableOpacity
-                        key={song.id}
-                        onPress={() => playSong(song, pl.songs)}
-                        style={{
-                          // width:'90%',
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          backgroundColor:
-                            currentSong?.id === song.id ? '#064e3b' : '#111827',
-                          borderRadius: 12,
-                          padding: 10,
-                          marginBottom: 10,
-                          marginLeft: 0,
-                          shadowColor: '#000',
-                          shadowOpacity: currentSong?.id === song.id ? 0.5 : 0,
-                          shadowRadius: 5,
-                          elevation: currentSong?.id === song.id ? 6 : 0,
-                        }}
-                      >
-                        <View
-                          style={{
-                            width: 36,
-                            height: 36,
-                            borderRadius: 10,
-                            backgroundColor:
-                              currentSong?.id === song.id
-                                ? '#10b981'
-                                : '#374151',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            marginRight: 12,
-                          }}
-                        >
-                          <Text style={{ color: 'white', fontWeight: 'bold' }}>
-                            {idx + 1}
-                          </Text>
-                        </View>
-                        <Image
-                          source={{
-                            uri: song.image?.[2]?.url || song.image?.[2]?.link,
-                          }}
-                          style={{
-                            width: 56,
-                            height: 56,
-                            borderRadius: 10,
-                            marginRight: 12,
-                          }}
-                        />
-                        <View style={{ flex: 1 }}>
-                          <Text
-                            style={{
-                              color:
-                                currentSong?.id === song.id
-                                  ? '#a7f3d0'
-                                  : 'white',
-                              fontWeight: 'bold',
-                              fontSize: 16,
-                            }}
-                            numberOfLines={1}
-                          >
-                            {song.name}
-                          </Text>
-                          <Text
-                            style={{ color: '#6b7280', fontSize: 12 }}
-                            numberOfLines={1}
-                          >
-                            {song.artists?.primary?.[0]?.name ||
-                              'Unknown Artist'}
-                          </Text>
-                        </View>
-                          <TouchableOpacity
-                            onPress={() =>
-                              handleRemoveSongFromPlaylist(pl.id, song.id)
-                            }
-                            style={{
-                              // paddingHorizontal: 8,
-                              // paddingVertical: 6,
-                              // backgroundColor: '#b91c1c',
-                              // borderRadius: 7,
-                              // marginLeft: 8,
-                            
-                            }}
-                          >
-                            <CloseCircleFill size={24} color="#dc2626" />
-                          </TouchableOpacity>
-                        <View
-                          style={{
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            zIndex: 9999,
-                            justifyContent: 'center',
-                            marginLeft:7,
-                            // backgroundColor: 'white',
-                            gap:10,
-                          }}
-                        >
-                          <TouchableOpacity
-                            onPress={() => moveSongUp(pl.id, idx)}
-                            disabled={idx === 0}
-                          >
-                            <Text
-                              style={{
-                                color: idx === 0 ? '#555' : '#2563eb',
-                                fontSize: 18,
-                              }}
-                            >
-                              ▲
-                            </Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            onPress={() => moveSongDown(pl.id, idx)}
-                            disabled={idx === pl.songs.length - 1}
-                          >
-                            <Text
-                              style={{
-                                color:
-                                  idx === pl.songs.length - 1
-                                    ? '#555'
-                                    : '#2563eb',
-                                fontSize: 18,
-                              }}
-                            >
-                              ▼
-                            </Text>
-                          </TouchableOpacity>
-                        </View>
-                      </TouchableOpacity>
-                    ))
-                  ))}
               </View>
             ))
           )}
@@ -595,6 +600,28 @@ export default function Likes({
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+      <PlaylistModal
+        visible={isPlaylistModalVisible}
+        onClose={closePlaylistModal}
+        song={selectedSong}
+        onUpdated={() => setCustomPlaylistUpdated(!CustomPlaylistUpdated)}
+      />
+      <SongOptionsBottomSheet
+        isVisible={sheetVisible}
+        onClose={closeSheet}
+        song={sheetSong}
+        onAddToPlaylist={openPlaylistModal}
+        onPlayNext={handleAddToQueue}
+        HasThreeBT={false}
+        currentSong={currentSong}
+        handlePlayNow={handlePlayNow}
+      />
+      <ImportJioSaavnModal
+        visible={isImportVisible}
+        setCustomPlaylistUpdated={setCustomPlaylistUpdated}
+        CustomPlaylistUpdated={CustomPlaylistUpdated}
+        onClose={() => setIsImportVisible(false)}
+      />
     </SafeAreaView>
   );
 }

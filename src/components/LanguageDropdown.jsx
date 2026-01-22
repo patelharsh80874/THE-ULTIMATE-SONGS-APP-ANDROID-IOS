@@ -152,11 +152,15 @@ import {LanguageIcon, ArrowDownIcon, CheckIcon} from './icons';
 import {BlurView} from '@react-native-community/blur';
 
 const LANGUAGES = [
-  {label: 'Hindi', value: 'hindi', emoji: '🇮🇳'},
-  {label: 'English', value: 'english', emoji: '🇬🇧'},
-  {label: 'Gujarati', value: 'gujarati', emoji: '🪔'},
+  {label: 'Hindi', value: 'hindi', emoji: '🎵'},
+  {label: 'English', value: 'english', emoji: '🎵'},
+  {label: 'Gujarati', value: 'gujarati', emoji: '🎵'},
   {label: 'Punjabi', value: 'punjabi', emoji: '🎵'},
-  {label: 'Rajasthani', value: 'rajasthani', emoji: '🏜️'},
+  {label: 'Rajasthani', value: 'rajasthani', emoji: '🎵'},
+  {label: 'Tamil', value: 'tamil', emoji: '🎵'},
+  {label: 'Telugu', value: 'telugu', emoji: '🎵'},
+  {label: 'Marathi', value: 'marathi', emoji: '🎵'},
+  {label: 'Kannada', value: 'kannada', emoji: '🎵'},
 ];
 
 export default function LanguageDropdown({selected, onSelect}) {
